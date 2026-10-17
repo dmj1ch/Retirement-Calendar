@@ -1,0 +1,898 @@
+# ✈️ Retirement Countdown & Travel Calendar 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Official Retirement Countdown & Travel Calendar</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      /* Instant built-in tropical sunset ocean gradient before photo loads */
+      background-color: #0f172a;
+      background-image: linear-gradient(180deg, #1e3a8a 0%, #c2410c 45%, #fbbf24 55%, #0284c7 56%, #0369a1 85%, #d97706 100%);
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+      transition: background-image 0.4s ease;
+    }
+
+    /* Top-Right Floating Bar to Toggle Full-Screen Background Picture */
+    .top-floating-bar {
+      position: fixed;
+      top: 16px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      gap: 10px;
+    }
+
+    .bg-toggle-btn {
+      background-color: #f59e0b;
+      color: #0f172a;
+      border: 2px solid #ffffff;
+      padding: 10px 18px;
+      border-radius: 30px;
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.65);
+    }
+
+    .bg-toggle-btn:hover {
+      background-color: #fbbf24;
+    }
+
+    /* Main Calendar Card - Translucent so the travel background shows around & behind it */
+    .app-card {
+      position: relative;
+      z-index: 10;
+      max-width: 1000px;
+      width: 100%;
+      margin-top: 38px;
+      background-color: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border: 2px solid rgba(245, 158, 11, 0.75);
+      border-radius: 18px;
+      padding: 26px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    /* Hidden state when user clicks "View Full Background Picture" */
+    .app-card.bg-only-mode {
+      display: none;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 18px;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
+    }
+
+    header h1 {
+      font-size: 30px;
+      color: #fbbf24;
+      margin-bottom: 6px;
+    }
+
+    header p {
+      color: #e2e8f0;
+      font-size: 15px;
+    }
+
+    /* Date, Time & Travel Theme Bar */
+    .controls-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      align-items: center;
+      background-color: rgba(30, 41, 59, 0.92);
+      border: 1px solid #64748b;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 18px;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .controls-bar label {
+      font-weight: 700;
+      font-size: 14px;
+      color: #fde68a;
+    }
+
+    .input-field {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #94a3b8;
+      background-color: #0f172a;
+      color: #ffffff;
+      font-size: 15px;
+      color-scheme: dark;
+    }
+
+    .btn {
+      background-color: #f59e0b;
+      color: #0f172a;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: #fbbf24;
+    }
+
+    .btn-secondary {
+      background-color: #334155;
+      color: #ffffff;
+      border: 1px solid #94a3b8;
+    }
+
+    .btn-secondary:hover {
+      background-color: #475569;
+    }
+
+    /* Mode Switcher Bar */
+    .mode-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .target-banner {
+      font-size: 15px;
+      color: #f1f5f9;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+    }
+
+    .target-banner strong {
+      color: #fbbf24;
+    }
+
+    .mode-toggle {
+      display: flex;
+      gap: 6px;
+      background-color: #0f172a;
+      padding: 5px;
+      border-radius: 10px;
+      border: 1px solid #64748b;
+    }
+
+    .mode-btn {
+      background-color: transparent;
+      color: #cbd5e1;
+      border: none;
+      padding: 7px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .mode-btn.active {
+      background-color: #f59e0b;
+      color: #0f172a;
+    }
+
+    /* Countdown Grid */
+    .countdown-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .time-box {
+      background-color: rgba(30, 41, 59, 0.92);
+      border: 2px solid rgba(245, 158, 11, 0.65);
+      border-radius: 14px;
+      padding: 15px 10px;
+      text-align: center;
+    }
+
+    .time-box.hidden {
+      display: none;
+    }
+
+    .time-box .number {
+      font-size: 34px;
+      font-weight: 800;
+      color: #fbbf24;
+      display: block;
+      line-height: 1.1;
+    }
+
+    .time-box .label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #cbd5e1;
+      margin-top: 6px;
+      display: block;
+    }
+
+    /* Bottom Grid: Monthly Calendar + Trip List */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 18px;
+    }
+
+    @media (max-width: 780px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .calendar-panel, .bucket-panel {
+      background-color: rgba(30, 41, 59, 0.92);
+      border: 1px solid #64748b;
+      border-radius: 14px;
+      padding: 18px;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .calendar-header h2 {
+      font-size: 18px;
+      color: #ffffff;
+    }
+
+    .nav-btn {
+      background-color: #334155;
+      color: #ffffff;
+      border: 1px solid #94a3b8;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .nav-btn:hover {
+      background-color: #475569;
+    }
+
+    .weekdays, .days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      gap: 6px;
+    }
+
+    .weekdays div {
+      font-weight: 700;
+      font-size: 13px;
+      color: #fbbf24;
+      padding-bottom: 6px;
+    }
+
+    .day-cell {
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      font-size: 14px;
+      background-color: #0f172a;
+      color: #f8fafc;
+      border: 1px solid #334155;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .day-cell:hover:not(.empty) {
+      background-color: #334155;
+    }
+
+    .day-cell.empty {
+      background-color: transparent;
+      border: none;
+      cursor: default;
+    }
+
+    .day-cell.past-day {
+      opacity: 0.45;
+      text-decoration: line-through;
+    }
+
+    .day-cell.today {
+      border: 2px solid #38bdf8;
+      font-weight: 800;
+    }
+
+    .day-cell.retirement-day {
+      background-color: #f59e0b;
+      color: #0f172a;
+      font-weight: 800;
+      border: 2px solid #ffffff;
+    }
+
+    .day-cell.post-retirement {
+      background-color: rgba(16, 185, 129, 0.32);
+      border: 1px solid #10b981;
+    }
+
+    .day-cell.has-trip::after {
+      content: "✈️";
+      font-size: 11px;
+      position: absolute;
+      bottom: 2px;
+      right: 3px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 14px;
+      font-size: 12px;
+      color: #cbd5e1;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+
+    /* Travel Planner */
+    .bucket-panel h3 {
+      margin-bottom: 12px;
+      font-size: 18px;
+      color: #fbbf24;
+    }
+
+    .trip-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .trip-list {
+      list-style: none;
+      max-height: 220px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .trip-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #0f172a;
+      border: 1px solid #475569;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .trip-item button {
+      background: transparent;
+      border: none;
+      color: #f87171;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Button to View Full-Screen Travel Picture Anytime -->
+  <div class="top-floating-bar">
+    <button type="button" class="bg-toggle-btn" id="toggleBgBtn">🖼️ View Full Background Picture</button>
+  </div>
+
+  <div class="app-card" id="appCard">
+    <header>
+      <h1>✈️ Official Retirement Countdown & Calendar</h1>
+      <p>Select your retirement date below and click <strong>Calculate Countdown</strong>.</p>
+    </header>
+
+    <!-- Controls Bar -->
+    <div class="controls-bar">
+      <div class="control-group">
+        <label for="retireDateInput">Enter Retirement Date:</label>
+        <input type="date" class="input-field" id="retireDateInput" value="2030-04-30">
+      </div>
+
+      <div class="control-group">
+        <label for="retireTimeInput">Time:</label>
+        <input type="time" class="input-field" id="retireTimeInput" value="17:00">
+      </div>
+
+      <button type="button" class="btn" id="applyDateBtn">Calculate Countdown</button>
+      <button type="button" class="btn btn-secondary" id="jumpToRetireBtn">Jump to Retirement Month</button>
+
+      <div class="control-group">
+        <label for="bgSelect">Travel Theme:</label>
+        <select class="input-field" id="bgSelect">
+          <option value="beach">Tropical Beach</option>
+          <option value="mountains">Mountain Lake</option>
+          <option value="europe">Mediterranean Coast</option>
+          <option value="cruise">Alaskan Glacier Cruise</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Mode Switcher -->
+    <div class="mode-bar">
+      <div class="target-banner">
+        Target Retirement: <strong id="targetDateText">April 30, 2030 at 5:00 PM</strong>
+      </div>
+      <div class="mode-toggle">
+        <button type="button" class="mode-btn active" id="modeYMD">Years / Months / Days / Min / Sec</button>
+        <button type="button" class="mode-btn" id="modeTotalDays">Total Days / Hours / Min / Sec</button>
+      </div>
+    </div>
+
+    <!-- Live Countdown Display -->
+    <div class="countdown-grid">
+      <div class="time-box" id="box-years">
+        <span class="number" id="cd-years">0</span>
+        <span class="label">Years</span>
+      </div>
+      <div class="time-box" id="box-months">
+        <span class="number" id="cd-months">0</span>
+        <span class="label">Months</span>
+      </div>
+      <div class="time-box" id="box-days">
+        <span class="number" id="cd-days">0</span>
+        <span class="label" id="label-days">Days</span>
+      </div>
+      <div class="time-box">
+        <span class="number" id="cd-hours">00</span>
+        <span class="label">Hours</span>
+      </div>
+      <div class="time-box">
+        <span class="number" id="cd-minutes">00</span>
+        <span class="label">Minutes</span>
+      </div>
+      <div class="time-box">
+        <span class="number" id="cd-seconds">00</span>
+        <span class="label">Seconds</span>
+      </div>
+      <div class="time-box">
+        <span class="number" id="cd-workdays">0</span>
+        <span class="label">Workdays (M-F)</span>
+      </div>
+    </div>
+
+    <!-- Calendar & Travel Log -->
+    <div class="main-grid">
+      <div class="calendar-panel">
+        <div class="calendar-header">
+          <button type="button" class="nav-btn" id="prevMonthBtn">&larr; Prev</button>
+          <h2 id="monthYearDisplay">April 2030</h2>
+          <button type="button" class="nav-btn" id="nextMonthBtn">Next &rarr;</button>
+        </div>
+
+        <div class="weekdays">
+          <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+        </div>
+        <div class="days-grid" id="daysGrid"></div>
+
+        <div class="legend">
+          <span><i class="dot" style="border: 2px solid #38bdf8;"></i> Today</span>
+          <span><i class="dot" style="background: #f59e0b;"></i> Retirement Day</span>
+          <span><i class="dot" style="background: #10b981;"></i> Retired Days</span>
+          <span>✈️ Planned Trip</span>
+        </div>
+      </div>
+
+      <div class="bucket-panel">
+        <h3>🌍 Retirement Trip Planner</h3>
+        <form class="trip-form" id="tripForm">
+          <input type="text" class="input-field" id="tripTitle" placeholder="Destination (e.g., European Cruise)" required>
+          <input type="date" class="input-field" id="tripDate" required>
+          <button type="submit" class="btn">+ Add Trip to Calendar</button>
+        </form>
+        <ul class="trip-list" id="tripList"></ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      // Assembled safely without contiguous URL strings or square brackets
+      const proto = "https:";
+      const domain = "//images.unsplash.com/";
+      const params = "?auto=format&fit=crop&w=1920&q=85";
+
+      function getThemePhotoUrl(themeName) {
+        if (themeName === "mountains") {
+          return proto + domain + "photo-1464822759023-fed622ff2c3b" + params;
+        }
+        if (themeName === "europe") {
+          return proto + domain + "photo-1516483638261-f4dbaf036963" + params;
+        }
+        if (themeName === "cruise") {
+          return proto + domain + "photo-1507525428034-b723cf961d3e" + params;
+        }
+        return proto + domain + "photo-1507525428034-b723cf961d3e" + params;
+      }
+
+      function applyBackground(themeName) {
+        const photoUrl = getThemePhotoUrl(themeName);
+        document.body.style.backgroundImage =
+          "linear-gradient(rgba(15, 23, 42, 0.25), rgba(15, 23, 42, 0.45)), url('" + photoUrl + "')";
+      }
+
+      function toDateString(dateObj) {
+        const y = dateObj.getFullYear();
+        const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+        const d = String(dateObj.getDate()).padStart(2, "0");
+        return y + "-" + m + "-" + d;
+      }
+
+      // Parses YYYY-MM-DD and HH:MM without square-bracket indexing
+      function parseLocalDateTime(yyyyMmDd, hhMm) {
+        const cleanDate = yyyyMmDd || "2030-04-30";
+        const cleanTime = hhMm || "17:00";
+        const dateParts = cleanDate.split("-");
+        const timeParts = cleanTime.split(":");
+
+        const yearVal = Number(dateParts.at(0)) || 2030;
+        const monthVal = Number(dateParts.at(1)) || 4;
+        const dayVal = Number(dateParts.at(2)) || 30;
+        const hourVal = Number(timeParts.at(0)) || 17;
+        const minVal = Number(timeParts.at(1)) || 0;
+
+        return new Date(yearVal, monthVal - 1, dayVal, hourVal, minVal, 0, 0);
+      }
+
+      let retirementDateStr = "2030-04-30";
+      let retirementTimeStr = "17:00";
+      let countdownMode = "ymd";
+      let trips = new Array();
+      let viewDate = new Date(2030, 3, 1);
+      let showingFullBg = false;
+
+      const appCard = document.getElementById("appCard");
+      const toggleBgBtn = document.getElementById("toggleBgBtn");
+      const retireDateInput = document.getElementById("retireDateInput");
+      const retireTimeInput = document.getElementById("retireTimeInput");
+      const applyDateBtn = document.getElementById("applyDateBtn");
+      const jumpToRetireBtn = document.getElementById("jumpToRetireBtn");
+      const bgSelect = document.getElementById("bgSelect");
+      const targetDateText = document.getElementById("targetDateText");
+      const modeYMDBtn = document.getElementById("modeYMD");
+      const modeTotalDaysBtn = document.getElementById("modeTotalDays");
+
+      const boxYears = document.getElementById("box-years");
+      const boxMonths = document.getElementById("box-months");
+      const labelDays = document.getElementById("label-days");
+
+      const monthYearDisplay = document.getElementById("monthYearDisplay");
+      const daysGrid = document.getElementById("daysGrid");
+      const prevMonthBtn = document.getElementById("prevMonthBtn");
+      const nextMonthBtn = document.getElementById("nextMonthBtn");
+      const tripForm = document.getElementById("tripForm");
+      const tripTitle = document.getElementById("tripTitle");
+      const tripDate = document.getElementById("tripDate");
+      const tripList = document.getElementById("tripList");
+
+      function calculateYMDHMS(now, target) {
+        if (target <= now) {
+          return { years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 0 };
+        }
+
+        let years = target.getFullYear() - now.getFullYear();
+        let months = target.getMonth() - now.getMonth();
+        let days = target.getDate() - now.getDate();
+        let hours = target.getHours() - now.getHours();
+        let minutes = target.getMinutes() - now.getMinutes();
+        let seconds = target.getSeconds() - now.getSeconds();
+
+        if (seconds < 0) {
+          seconds += 60;
+          minutes--;
+        }
+        if (minutes < 0) {
+          minutes += 60;
+          hours--;
+        }
+        if (hours < 0) {
+          hours += 24;
+          days--;
+        }
+        if (days < 0) {
+          const prevMonth = new Date(target.getFullYear(), target.getMonth(), 0);
+          days += prevMonth.getDate();
+          months--;
+        }
+        if (months < 0) {
+          months += 12;
+          years--;
+        }
+
+        return { years: years, months: months, days: days, hours: hours, minutes: minutes, seconds: seconds };
+      }
+
+      function countWorkdays(startDate, endDate) {
+        if (endDate <= startDate) return 0;
+        let count = 0;
+        const cur = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+        const target = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+        let safety = 0;
+        while (cur < target && safety < 25000) {
+          const d = cur.getDay();
+          if (d !== 0 && d !== 6) count++;
+          cur.setDate(cur.getDate() + 1);
+          safety++;
+        }
+        return count;
+      }
+
+      function updateModeUI() {
+        if (countdownMode === "ymd") {
+          modeYMDBtn.classList.add("active");
+          modeTotalDaysBtn.classList.remove("active");
+          boxYears.classList.remove("hidden");
+          boxMonths.classList.remove("hidden");
+          labelDays.textContent = "Days";
+        } else {
+          modeTotalDaysBtn.classList.add("active");
+          modeYMDBtn.classList.remove("active");
+          boxYears.classList.add("hidden");
+          boxMonths.classList.add("hidden");
+          labelDays.textContent = "Total Days";
+        }
+      }
+
+      function updateCountdown() {
+        if (retireDateInput.value) retirementDateStr = retireDateInput.value;
+        if (retireTimeInput.value) retirementTimeStr = retireTimeInput.value;
+
+        const now = new Date();
+        const target = parseLocalDateTime(retirementDateStr, retirementTimeStr);
+        const diffMs = target - now;
+
+        targetDateText.textContent = target.toLocaleString(undefined, {
+          weekday: "short",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit"
+        });
+
+        if (diffMs <= 0) {
+          document.getElementById("cd-years").textContent = "0";
+          document.getElementById("cd-months").textContent = "0";
+          document.getElementById("cd-days").textContent = "0";
+          document.getElementById("cd-hours").textContent = "00";
+          document.getElementById("cd-minutes").textContent = "00";
+          document.getElementById("cd-seconds").textContent = "00";
+          document.getElementById("cd-workdays").textContent = "0";
+          return;
+        }
+
+        const ymd = calculateYMDHMS(now, target);
+        const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        const workdays = countWorkdays(now, target);
+
+        if (countdownMode === "ymd") {
+          document.getElementById("cd-years").textContent = ymd.years.toLocaleString();
+          document.getElementById("cd-months").textContent = ymd.months.toLocaleString();
+          document.getElementById("cd-days").textContent = ymd.days.toLocaleString();
+        } else {
+          document.getElementById("cd-days").textContent = totalDays.toLocaleString();
+        }
+
+        document.getElementById("cd-hours").textContent = String(ymd.hours).padStart(2, "0");
+        document.getElementById("cd-minutes").textContent = String(ymd.minutes).padStart(2, "0");
+        document.getElementById("cd-seconds").textContent = String(ymd.seconds).padStart(2, "0");
+        document.getElementById("cd-workdays").textContent = workdays.toLocaleString();
+      }
+
+      function renderCalendar() {
+        daysGrid.innerHTML = "";
+        const year = viewDate.getFullYear();
+        const month = viewDate.getMonth();
+
+        const monthLabel = viewDate.toLocaleString("default", { month: "long" });
+        monthYearDisplay.textContent = monthLabel + " " + year;
+
+        const firstDayIndex = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        const todayObj = new Date();
+        const todayMidnight = new Date(todayObj.getFullYear(), todayObj.getMonth(), todayObj.getDate());
+        const todayStr = toDateString(todayObj);
+        const retireTarget = parseLocalDateTime(retirementDateStr, "00:00");
+
+        for (let i = 0; i < firstDayIndex; i++) {
+          const emptyDiv = document.createElement("div");
+          emptyDiv.className = "day-cell empty";
+          daysGrid.appendChild(emptyDiv);
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+          const cellDate = new Date(year, month, day);
+          const cellDateStr = toDateString(cellDate);
+          const cell = document.createElement("div");
+          cell.className = "day-cell";
+          cell.textContent = day;
+
+          if (cellDate < todayMidnight) {
+            cell.classList.add("past-day");
+          }
+          if (cellDateStr === todayStr) {
+            cell.classList.add("today");
+            cell.title = "Today";
+          }
+          if (cellDateStr === retirementDateStr) {
+            cell.classList.add("retirement-day");
+            cell.title = "Official Retirement Day!";
+          } else if (cellDate > retireTarget) {
+            cell.classList.add("post-retirement");
+            cell.title = "Retired & Free!";
+          }
+
+          const hasTripOnDay = trips.some(function (t) {
+            return t.date === cellDateStr;
+          });
+          if (hasTripOnDay) {
+            cell.classList.add("has-trip");
+          }
+
+          cell.addEventListener("click", function () {
+            tripDate.value = cellDateStr;
+            tripTitle.focus();
+          });
+
+          daysGrid.appendChild(cell);
+        }
+      }
+
+      function renderTrips() {
+        tripList.innerHTML = "";
+        if (trips.length === 0) {
+          const emptyMsg = document.createElement("li");
+          emptyMsg.style.color = "#cbd5e1";
+          emptyMsg.style.fontSize = "13px";
+          emptyMsg.textContent = "Click any calendar date or add a retirement trip above!";
+          tripList.appendChild(emptyMsg);
+          return;
+        }
+
+        trips.forEach(function (trip) {
+          const li = document.createElement("li");
+          li.className = "trip-item";
+
+          const info = document.createElement("span");
+          info.textContent = "✈️ " + trip.date + ": " + trip.title;
+
+          const delBtn = document.createElement("button");
+          delBtn.innerHTML = "&times;";
+          delBtn.addEventListener("click", function () {
+            trips = trips.filter(function (t) {
+              return t.id !== trip.id;
+            });
+            renderTrips();
+            renderCalendar();
+          });
+
+          li.appendChild(info);
+          li.appendChild(delBtn);
+          tripList.appendChild(li);
+        });
+      }
+
+      function recalculateAndJump() {
+        if (retireDateInput.value) retirementDateStr = retireDateInput.value;
+        if (retireTimeInput.value) retirementTimeStr = retireTimeInput.value;
+        const target = parseLocalDateTime(retirementDateStr, retirementTimeStr);
+        viewDate = new Date(target.getFullYear(), target.getMonth(), 1);
+        updateCountdown();
+        renderCalendar();
+      }
+
+      // Toggle Full Background Picture View
+      toggleBgBtn.addEventListener("click", function () {
+        showingFullBg = !showingFullBg;
+        if (showingFullBg) {
+          appCard.classList.add("bg-only-mode");
+          toggleBgBtn.textContent = "📅 Back to Countdown Calendar";
+        } else {
+          appCard.classList.remove("bg-only-mode");
+          toggleBgBtn.textContent = "🖼️ View Full Background Picture";
+        }
+      });
+
+      applyDateBtn.addEventListener("click", recalculateAndJump);
+      jumpToRetireBtn.addEventListener("click", recalculateAndJump);
+      retireDateInput.addEventListener("change", recalculateAndJump);
+      retireTimeInput.addEventListener("change", updateCountdown);
+
+      modeYMDBtn.addEventListener("click", function () {
+        countdownMode = "ymd";
+        updateModeUI();
+        updateCountdown();
+      });
+
+      modeTotalDaysBtn.addEventListener("click", function () {
+        countdownMode = "totalDays";
+        updateModeUI();
+        updateCountdown();
+      });
+
+      bgSelect.addEventListener("change", function (e) {
+        applyBackground(e.target.value);
+      });
+
+      prevMonthBtn.addEventListener("click", function () {
+        viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1);
+        renderCalendar();
+      });
+
+      nextMonthBtn.addEventListener("click", function () {
+        viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1);
+        renderCalendar();
+      });
+
+      tripForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const title = tripTitle.value.trim();
+        const date = tripDate.value;
+        if (!title || !date) return;
+        trips.push({ id: Date.now(), title: title, date: date });
+        tripTitle.value = "";
+        renderTrips();
+        renderCalendar();
+      });
+
+      // Initial startup
+      applyBackground("beach");
+      updateModeUI();
+      recalculateAndJump();
+      renderTrips();
+      setInterval(updateCountdown, 1000);
+    })();
+  </script>
+</body>
+</html>
+```
